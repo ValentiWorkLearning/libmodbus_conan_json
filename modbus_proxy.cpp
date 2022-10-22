@@ -116,7 +116,10 @@ public:
 
         auto errCode = modbus_write_registers(
             m_pModbusHandle.get(), registerAddress, registers.size(), registers.data());
-        const bool isFailedWrite{isFailed(errCode)};
+        const bool isFailedWrite{};
+        if (!isFailedWrite)
+            return;
+
         while (isFailedWrite && (numAttempts != 0))
         {
             errCode = modbus_write_registers(

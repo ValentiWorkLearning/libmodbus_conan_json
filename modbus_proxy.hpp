@@ -1,16 +1,17 @@
 #pragma once
+#include "ih_modbus_proxy.hpp"
 #include "modbus_proxy_types.hpp"
 #include <cstdint>
 #include <memory>
 #include <optional>
 #include <vector>
 
-class ModbusRequestsProxy
+class ModbusRequestsProxy : public IModbusProxy
 {
 
 public:
     ModbusRequestsProxy(const ModbusConfigData& applicationConfig);
-    ~ModbusRequestsProxy();
+    virtual ~ModbusRequestsProxy();
 
 public:
     std::optional<std::int16_t> readRegister(std::uint16_t registerAddress);

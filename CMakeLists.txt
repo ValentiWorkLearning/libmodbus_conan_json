@@ -29,6 +29,7 @@ set(CONAN_REQUIRED_LIBRARIES_LIST
     spdlog/1.9.2
     libmodbus/3.1.6
     boost/1.79.0
+    nlohmann_json/3.10.5
 )
 
 set(CONAN_PACKAGES_OPTIONS
@@ -69,9 +70,10 @@ endif()
 find_package(libmodbus REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
-add_executable(modbus_test main.cpp modbus_proxy.cpp)
+add_executable(modbus_test main.cpp modbus_proxy.cpp modbus_scenario_handler.cpp)
 target_include_directories(modbus_test PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(modbus_test  PRIVATE libmodbus::libmodbus Boost::boost Boost::program_options spdlog::spdlog)
+target_link_libraries(modbus_test  PRIVATE libmodbus::libmodbus Boost::boost Boost::program_options spdlog::spdlog nlohmann_json::nlohmann_json)
 
