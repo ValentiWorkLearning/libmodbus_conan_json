@@ -93,7 +93,7 @@ private:
 
             auto registerRead{m_pModbusDevice->readRegister(kRegisterNum)};
             if (registerRead)
-                spdlog::info("register {} value: {}", kRegisterNum, registerRead.value());
+                spdlog::info("register 0x{:x} value: {}", kRegisterNum, registerRead.value());
             else
                 spdlog::error("failed to read from {}", kRegisterNum);
         }
