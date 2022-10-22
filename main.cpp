@@ -4,6 +4,8 @@
 #include "utils.hpp"
 #include <boost/program_options.hpp>
 
+#include "application_ui.hpp"
+
 #include <format>
 #include <iostream>
 
@@ -37,6 +39,8 @@ int main(int argc, const char** av)
 
     try
     {
+
+        ApplicationUi::launchUiTest();
 
         auto modbusScenariosHandler{
             std::make_unique<ModbusScenarioHandler>(scenarioPath, std::move(pModbusProxy))};
