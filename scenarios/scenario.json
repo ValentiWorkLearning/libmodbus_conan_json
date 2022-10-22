@@ -1,0 +1,26 @@
+{
+  "scenarios": [
+    {
+      "operation": "write",
+      "repitions": 1,
+      "title": "write to registers",
+      "registers": [
+        [ "0x50", 4 ],
+        [ "0x52", 5 ],
+        [ "0x54", 7 ]
+      ],
+      "delay": 2000
+    },
+    {
+      "operation": "read",
+      "repitions": 1,
+      "title": "read from registers",
+      "registers": [
+        [ "0x50" ],
+        [ "0x52" ],
+        [ "0x54" ]
+      ],
+      "delay": 2000
+    }
+  ]
+}

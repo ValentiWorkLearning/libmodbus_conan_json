@@ -116,7 +116,7 @@ public:
 
         auto errCode = modbus_write_registers(
             m_pModbusHandle.get(), registerAddress, registers.size(), registers.data());
-        const bool isFailedWrite{};
+        const bool isFailedWrite{isFailed(errCode)};
         if (!isFailedWrite)
             return;
 

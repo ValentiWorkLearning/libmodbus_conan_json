@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <ranges>
 #include <spdlog/spdlog.h>
+#include <thread>
 
 using json = nlohmann::json;
 
@@ -11,6 +12,21 @@ namespace
 {
 constinit std::string_view kWriteOperation = "write";
 constinit std::string_view kReadOperation = "read";
+
+std::uint16_t stringToRegister(const std::string& registerHex)
+{
+    auto registerNumStrView{std::string_view{registerHex}};
+
+    auto xPos{registerNumStrView.find_last_of("x") + 1};
+    std::string_view registerNumHex = registerNumStrView.substr(xPos);
+
+    std::stringstream ss;
+    ss << std::hex << registerNumHex;
+
+    std::uint16_t hexValue{};
+    ss >> hexValue;
+    return hexValue;
+}
 
 } // namespace
 
@@ -23,7 +39,7 @@ public:
         : m_scenarioPath{scenarioPath}, m_pModbusDevice{std::move(modbusProxy)}
     {
         if (!std::filesystem::exists(scenarioPath))
-            throw std::runtime_error("Scenario path doesn't exists!");
+            throw std::runtime_error("Scenario path doesn't exist!");
     }
 
 public:
@@ -33,10 +49,12 @@ public:
         json jsonRoot{json::parse(scenarioFile)};
         json jsonScenario{jsonRoot["scenarios"]};
 
-        spdlog::warn(
-            "***********SCENARIO {} BEGIN********************", jsonScenario.value("title", ""));
         for (const auto& scenarioItem : jsonScenario)
         {
+            spdlog::warn(
+                "***********SCENARIO {} BEGIN********************",
+                scenarioItem.value("title", ""));
+
             const auto& operation = scenarioItem["operation"].get<std::string>();
             const auto& repetionsCount = scenarioItem["repitions"].get<std::int64_t>();
 
@@ -47,9 +65,13 @@ public:
                 else if (operation == kWriteOperation)
                     handleWriteOperation(scenarioItem);
             }
+            spdlog::warn(
+                "***********SCENARIO {} END**********************",
+                scenarioItem.value("title", ""));
+            if (scenarioItem.find("delay") != scenarioItem.end())
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(scenarioItem["delay"].get<int>()));
         }
-        spdlog::warn(
-            "***********SCENARIO {} END**********************", jsonScenario.value("title", ""));
     }
 
 private:
@@ -59,12 +81,21 @@ private:
 
         for (const auto& registerItem : registers)
         {
-            auto registerNum = boost::lexical_cast<std::uint16_t>(registerItem.get<std::string>());
-            auto registerRead{m_pModbusDevice->readRegister(registerNum)};
-            if (registerRead)
-                spdlog::info("register {} value: {}", registerNum, registerRead.value());
+            std::uint16_t kRegisterNum{};
+            if (registerItem.is_array())
+            {
+                kRegisterNum = stringToRegister(registerItem.at(0).get<std::string>());
+            }
             else
-                spdlog::error("failed to read from {}",registerNum);
+            {
+                kRegisterNum = stringToRegister(registerItem.get<std::string>());
+            }
+
+            auto registerRead{m_pModbusDevice->readRegister(kRegisterNum)};
+            if (registerRead)
+                spdlog::info("register {} value: {}", kRegisterNum, registerRead.value());
+            else
+                spdlog::error("failed to read from {}", kRegisterNum);
         }
     }
 
@@ -73,10 +104,10 @@ private:
         const auto& registers = scenarioItem["registers"];
         for (const auto& registerItem : registers)
         {
-            auto registerNum = boost::lexical_cast<std::uint16_t>(registerItem[0].get<std::string>());
+            auto registerNum = stringToRegister(registerItem[0].get<std::string>());
             auto registerValue = registerItem[1].get<std::uint16_t>();
 
-           m_pModbusDevice->scheduleRegistersWrite(registerNum, {registerValue});
+            m_pModbusDevice->scheduleRegistersWrite(registerNum, {registerValue});
         }
     }
 

@@ -77,3 +77,17 @@ target_include_directories(modbus_test PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(modbus_test  PRIVATE libmodbus::libmodbus Boost::boost Boost::program_options spdlog::spdlog nlohmann_json::nlohmann_json)
 
+
+install(FILES "${CMAKE_CURRENT_LIST_DIR}/scenarios/scenario.json"
+  DESTINATION bin
+  )
+install(TARGETS modbus_test DESTINATION bin)
+
+
+add_custom_command(
+    TARGET modbus_test 
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+   "${CMAKE_CURRENT_LIST_DIR}/scenarios/scenario.json"
+    "${CMAKE_CURRENT_BINARY_DIR}/scenario.json"
+)

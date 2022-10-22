@@ -17,6 +17,9 @@ static ModbusConfigData parseCmdConfig(const po::variables_map& vm)
     int slaveId{vm["slave_id"].as<int>()};
     data.modbusSlaveAddress = slaveId;
 
+    bool debugMode{vm["debug_mode"].as<bool>()};
+    data.isDebugMode = debugMode;
+
     auto fCheckOption = [&vm]<typename TOption>(
                             auto optionName,
                             auto existsOptionText,
@@ -46,5 +49,6 @@ static ModbusConfigData parseCmdConfig(const po::variables_map& vm)
     fCheckOption(
         "slave_id", "Slave ID is: {}", "Slave id is not set, the default {} will be used", slaveId);
 
+    fCheckOption("debug_mode", "Debug mode is:{}", "Debug mode is OFF by default", debugMode);
     return data;
 }
